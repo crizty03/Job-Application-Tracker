@@ -2,8 +2,10 @@ import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import { db } from "@/lib/db";
+import { authConfig } from "./auth.config";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
+  ...authConfig,
   providers: [
     CredentialsProvider({
       name: "Credentials",
@@ -29,25 +31,5 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         return null;
       }
     })
-  ],
-  callbacks: {
-    async session({ session, token }) {
-      if (token.sub && session.user) {
-        session.user.id = token.sub;
-      }
-      return session;
-    },
-    async jwt({ token, user }) {
-      if (user) {
-        token.sub = user.id;
-      }
-      return token;
-    }
-  },
-  pages: {
-    signIn: "/login",
-  },
-  session: {
-    strategy: "jwt"
-  }
+  ]
 });
