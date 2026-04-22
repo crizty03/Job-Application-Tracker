@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import {
   LayoutDashboard,
   Briefcase,
@@ -99,12 +99,10 @@ export function MobileNav({ user }: { user: any }) {
               <span className="text-[color:var(--muted-foreground)]">Toggle Theme</span>
             </Button>
             
-            <Button asChild className="w-full justify-start gap-3 h-14 text-base">
-              <Link href="/applications/new" onClick={() => setIsOpen(false)}>
-                <PlusCircle size={20} />
-                New Application
-              </Link>
-            </Button>
+            <Link href="/applications/new" onClick={() => setIsOpen(false)} className={cn(buttonVariants({ variant: "default" }), "w-full justify-start gap-3 h-14 text-base")}>
+              <PlusCircle size={20} />
+              New Application
+            </Link>
 
             <Button variant="ghost" className="w-full justify-start gap-3 h-14 text-base text-red-500 hover:text-red-600 hover:bg-red-500/10" onClick={() => signOut()}>
               <LogOut size={20} />
