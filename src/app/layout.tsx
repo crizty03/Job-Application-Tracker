@@ -22,9 +22,13 @@ export const metadata: Metadata = {
     statusBarStyle: "default",
     title: "Job Tracker",
   },
+  icons: {
+    apple: "/icon-192.png",
+  },
 };
 
 import { Sidebar } from "@/components/layout/sidebar";
+import { MobileNav } from "@/components/layout/mobile-nav";
 
 import { ThemeProvider } from "@/components/theme-provider";
 import { auth } from "@/auth";
@@ -42,10 +46,11 @@ export default async function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
       suppressHydrationWarning
     >
-      <body className="min-h-full flex h-screen overflow-hidden bg-[color:var(--background)]">
+      <body className="min-h-full flex flex-col md:flex-row h-screen overflow-hidden bg-[color:var(--background)]">
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           {session && session.user && <Sidebar user={session.user} />}
-          <main className="flex-1 overflow-y-auto bg-[color:var(--muted)]/30 p-8">
+          {session && session.user && <MobileNav user={session.user} />}
+          <main className="flex-1 overflow-y-auto bg-[color:var(--muted)]/30 p-4 md:p-8">
             <div className="mx-auto max-w-6xl">
               {children}
             </div>

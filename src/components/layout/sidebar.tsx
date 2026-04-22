@@ -28,7 +28,7 @@ export function Sidebar({ user }: { user: any }) {
   const { theme, setTheme } = useTheme();
 
   return (
-    <div className="flex h-full w-64 flex-col border-r border-[color:var(--border)] bg-[color:var(--card)] px-3 py-4">
+    <div className="hidden md:flex h-full w-64 flex-col border-r border-[color:var(--border)] bg-[color:var(--card)] px-3 py-4">
       <div className="mb-8 flex items-center px-3">
         <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[color:var(--foreground)] text-[color:var(--background)]">
           <Briefcase size={18} />
