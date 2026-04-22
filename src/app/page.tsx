@@ -1,65 +1,91 @@
-import Image from "next/image";
+import { getApplications } from "@/actions/application";
+import { StatCard } from "@/components/dashboard/stat-card";
+import { ApplicationsBarChart, StatusPieChart } from "@/components/dashboard/charts";
+import { Briefcase, Send, CheckCircle, XCircle } from "lucide-react";
+import { format, subDays } from "date-fns";
 
-export default function Home() {
+export default async function DashboardPage() {
+  const result = await getApplications();
+  const applications = result.success ? result.data || [] : [];
+
+  // Calculate stats
+  const total = applications.length;
+  const interviews = applications.filter(a => a.status === "Interview").length;
+  const rejected = applications.filter(a => a.status === "Rejected").length;
+  const offers = applications.filter(a => a.status === "Offer").length;
+  
+  const responseRate = total > 0 ? Math.round(((interviews + offers + rejected) / total) * 100) : 0;
+
+  // Process data for bar chart (last 7 days)
+  const last7Days = Array.from({ length: 7 }).map((_, i) => {
+    const d = subDays(new Date(), 6 - i);
+    return {
+      name: format(d, "MMM dd"),
+      date: format(d, "yyyy-MM-dd"),
+      total: 0
+    };
+  });
+
+  applications.forEach(app => {
+    const dStr = format(new Date(app.dateApplied), "yyyy-MM-dd");
+    const dayData = last7Days.find(d => d.date === dStr);
+    if (dayData) {
+      dayData.total += 1;
+    }
+  });
+
+  // Process data for pie chart
+  const statusCounts = applications.reduce((acc, app) => {
+    acc[app.status] = (acc[app.status] || 0) + 1;
+    return acc;
+  }, {} as Record<string, number>);
+
+  const pieData = Object.keys(statusCounts).map(key => ({
+    name: key,
+    value: statusCounts[key]
+  }));
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
+    <div className="space-y-8">
+      <div>
+        <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+        <p className="text-[color:var(--muted-foreground)]">Overview of your job search progress.</p>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <StatCard
+          title="Total Applications"
+          value={total}
+          icon={Send}
         />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+        <StatCard
+          title="Interviews Scheduled"
+          value={interviews}
+          icon={Briefcase}
+        />
+        <StatCard
+          title="Offers Received"
+          value={offers}
+          icon={CheckCircle}
+        />
+        <StatCard
+          title="Response Rate"
+          value={`${responseRate}%`}
+          icon={XCircle}
+          description="Applications with any response"
+        />
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+        <ApplicationsBarChart data={last7Days} />
+        {pieData.length > 0 ? (
+          <StatusPieChart data={pieData} />
+        ) : (
+          <div className="col-span-3 rounded-xl border border-[color:var(--border)] bg-[color:var(--card)] flex items-center justify-center text-[color:var(--muted-foreground)] h-[380px]">
+            No status data available
+          </div>
+        )}
+      </div>
     </div>
   );
 }
