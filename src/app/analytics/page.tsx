@@ -2,6 +2,9 @@ import { getApplications } from "@/actions/application";
 import { ApplicationsBarChart, StatusPieChart } from "@/components/dashboard/charts";
 import { format, subDays } from "date-fns";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export default async function AnalyticsPage() {
   const result = await getApplications();
   const applications = result.success ? result.data || [] : [];
