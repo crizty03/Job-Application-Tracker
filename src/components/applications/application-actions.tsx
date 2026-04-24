@@ -4,7 +4,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { updateApplicationStatus, deleteApplication } from "@/actions/application";
 import { Button } from "@/components/ui/button";
-import { Trash } from "lucide-react";
+import { Trash, Pencil } from "lucide-react";
+import Link from "next/link";
 
 export function ApplicationActions({ id, currentStatus }: { id: string, currentStatus: string }) {
   const router = useRouter();
@@ -45,6 +46,12 @@ export function ApplicationActions({ id, currentStatus }: { id: string, currentS
         <option value="Offer">Offer</option>
       </select>
       
+      <Button variant="outline" size="icon" asChild>
+        <Link href={`/applications/${id}/edit`}>
+          <Pencil className="h-4 w-4" />
+        </Link>
+      </Button>
+
       <Button variant="destructive" size="icon" onClick={handleDelete} disabled={isDeleting}>
         <Trash className="h-4 w-4" />
       </Button>
